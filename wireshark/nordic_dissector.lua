@@ -5,6 +5,7 @@ nordic_proto = Proto("nordic","Nordic Semiconductor nRF24L")
 function nordic_proto.dissector(buffer,pinfo,tree)
     pinfo.cols.protocol = "NORDIC"
     local subtree = tree:add(nordic_proto,buffer(),"nRF24L Packet")
+    pinfo.cols.info = ""
 
     -- channel
     local channel = buffer(0,1):uint()
@@ -33,9 +34,11 @@ function nordic_proto.dissector(buffer,pinfo,tree)
 
     -- address
     local address = buffer(7,address_length)
+    local address_bytes = address:bytes()
 
     -- payload
     local payload = buffer(7+address_length,payload_length)
+    local payload_bytes = payload:bytes()
 
     -- crc
     local crc = buffer(7+address_length+payload_length, crc_length)
@@ -51,10 +54,13 @@ function nordic_proto.dissector(buffer,pinfo,tree)
     subtree:add(buffer(7+address_length,payload_length), "Payload:         " .. payload)
     subtree:add(buffer(7+address_length+payload_length, crc_length), "CRC:             " .. crc)
 
+    -- Keepalive (vendor agnostic)
+    if payload_bytes:len() == 0 then
+      pinfo.cols.info = "ACK"
+    end
+
     -- Microsoft
     if bit.band(buffer(7,1):uint(), 0xF0) == 0xA0 and payload_length > 0 then 
-
-      payload_bytes = payload:bytes()
 
       -- Validate the checksum (AES encrypted series)
       local sum = 0xFF
@@ -64,9 +70,16 @@ function nordic_proto.dissector(buffer,pinfo,tree)
       sum = bit.band(sum, 0xFF)
       if sum == 0 then
 
+        -- Microsoft keepalive
+        if payload_bytes:get_index(1) == 0x38 and payload_bytes:len() == 8 then
+          pinfo.cols.info = "Keepalive"
+        end
+
         -- Microsoft mouse movement/click 
         if payload_bytes:get_index(1) == 0x90 then
+
           local vtree = subtree:add(nordic_proto, buffer(), "Microsoft Movement/Click")
+          pinfo.cols.info = "Microsoft Mouse Movement/Click"
           vtree:add(string.format("Device Type: 0x%02x", payload_bytes:get_index(2)))
 
           -- Movement X/Y
