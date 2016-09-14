@@ -51,24 +51,43 @@ function nordic_proto.dissector(buffer,pinfo,tree)
     subtree:add(buffer(7+address_length,payload_length), "Payload:         " .. payload)
     subtree:add(buffer(7+address_length+payload_length, crc_length), "CRC:             " .. crc)
 
-    -- Classify Microsoft packets
+    -- Microsoft
     if bit.band(buffer(7,1):uint(), 0xF0) == 0xA0 and payload_length > 0 then 
 
       payload_bytes = payload:bytes()
-      
-      -- Validate the checksum
-      local sum = 0
+
+      -- Validate the checksum (AES encrypted series)
+      local sum = 0xFF
       for x = 0, payload_bytes:len()-1 do
-        sum = sum + payload_bytes:get_index(x)
+        sum = bit.bxor(sum, payload_bytes:get_index(x))
       end
       sum = bit.band(sum, 0xFF)
-      if sum == 0 or true then
+      if sum == 0 then
 
-        if bit.band(buffer(11,1):uint(), 0x0F) == 0x06 then
-          subtree:add(buffer(11, 1), "Device Type:     Microsoft Mouse")
-        else
-          subtree:add(buffer(11, 1), "Device Type:     Microsoft (Unknown)")
+        -- Microsoft mouse movement/click 
+        if payload_bytes:get_index(1) == 0x90 then
+          local vtree = subtree:add(nordic_proto, buffer(), "Microsoft Movement/Click")
+          vtree:add(string.format("Device Type: 0x%02x", payload_bytes:get_index(2)))
+
+          -- Movement X/Y
+          local movement_x = payload(9, 2):le_int()
+          local movement_y = payload(11, 2):le_int()
+          vtree:add(string.format("Movement X:   %i", movement_x))
+          vtree:add(string.format("Movement Y:   %i", movement_y))
+
+          -- Button mask 
+          local button_mask = payload(12, 1):uint()
+          vtree:add(string.format("Button 0:     %i", bit.band(bit.rshift(button_mask, 0), 1)))
+          vtree:add(string.format("Button 1:     %i", bit.band(bit.rshift(button_mask, 1), 1)))
+          vtree:add(string.format("Button 2:     %i", bit.band(bit.rshift(button_mask, 2), 1)))
+          vtree:add(string.format("Button 3:     %i", bit.band(bit.rshift(button_mask, 3), 1)))
+          vtree:add(string.format("Button 4:     %i", bit.band(bit.rshift(button_mask, 4), 1)))
+          vtree:add(string.format("Button 5:     %i", bit.band(bit.rshift(button_mask, 5), 1)))
+          vtree:add(string.format("Button 6:     %i", bit.band(bit.rshift(button_mask, 6), 1)))
+          vtree:add(string.format("Button 7:     %i", bit.band(bit.rshift(button_mask, 7), 1)))
+
         end
+
       end
     end
 

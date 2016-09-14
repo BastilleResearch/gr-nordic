@@ -124,11 +124,10 @@ class nordictap_ack_handler(gr.sync_block):
             print 'PLD=' + ':'.join('%02X' % ord(b) for b in payload),
             print 'CRC=' + ':'.join('%02X' % ord(b) for b in crc)
 
-            # Build an ACK in duplicate
+            # Build an ACK
             nordictap = [4, 2, 5, 0, sequence_number, 0, 2]
             for c in address:
                 nordictap.append(ord(c))
-            # nordictap = nordictap * 2
 
             # Transmit an ACK
             vec = pmt.make_u8vector(len(nordictap), 0)
