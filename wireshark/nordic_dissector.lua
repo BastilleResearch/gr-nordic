@@ -72,11 +72,13 @@ function nordic_proto.dissector(buffer,pinfo,tree)
           -- Movement X/Y
           local movement_x = payload(9, 2):le_int()
           local movement_y = payload(11, 2):le_int()
+          local scroll = payload(13, 2):le_int()
           vtree:add(string.format("Movement X:   %i", movement_x))
           vtree:add(string.format("Movement Y:   %i", movement_y))
+          vtree:add(string.format("Scroll Wheel: %i", scroll))
 
           -- Button mask 
-          local button_mask = payload(12, 1):uint()
+          local button_mask = payload(8, 1):uint()
           vtree:add(string.format("Button 0:     %i", bit.band(bit.rshift(button_mask, 0), 1)))
           vtree:add(string.format("Button 1:     %i", bit.band(bit.rshift(button_mask, 1), 1)))
           vtree:add(string.format("Button 2:     %i", bit.band(bit.rshift(button_mask, 2), 1)))
