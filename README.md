@@ -46,7 +46,7 @@ The wireshark dissector will display Enhanced Shockburst packets in Wireshark. T
 
 ### wireshark/nordic_dissector.lua
 
-wireshark -X lua_script:wireshark/nordic_dissector.lua -i lo -k -f udp
+```wireshark -X lua_script:wireshark/nordic_dissector.lua -i lo -k -f udp ```
 
 ## nRF24LU1+ research firmware
 
