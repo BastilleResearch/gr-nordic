@@ -32,13 +32,13 @@ Single channel receiver with auto-ACK. Listening (and ACKing) on channel 4 (2404
 
 Sweeping single channel receiver, which sweeps between channels 2-83 looking for Enhanced Shockburst packets. During receive activity, it camps on a given channel until idle. 
 
-```./nordic_sniffer_scanner.py```
+```./nordic_sniffer_scanner.py ```
 
 ### microsoft_mouse_sniffer.py
 
 Microsoft mouse/keyboard following receiver. When launched, this script will sweep between the 24 possible Microsoft wireless keyboard/mouse channels. When a device is found, it switches to that device's 4-channel group, sweeping between that set to follow the device. 
 
-```./microsoft_mouse_sniffer.py```
+```./microsoft_mouse_sniffer.py ```
 
 ## wireshark dissector
 
