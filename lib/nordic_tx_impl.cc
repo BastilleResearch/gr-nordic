@@ -32,19 +32,20 @@ namespace gr {
   namespace nordic {
 
     nordic_tx::sptr
-    nordic_tx::make()
+    nordic_tx::make(uint8_t channel_count)
     {
       return gnuradio::get_initial_sptr
-        (new nordic_tx_impl());
+        (new nordic_tx_impl(channel_count));
     }
 
     /*
      * The private constructor
      */
-    nordic_tx_impl::nordic_tx_impl()
+    nordic_tx_impl::nordic_tx_impl(uint8_t channel_count)
       : gr::sync_block("nordic_tx",
               gr::io_signature::make(0, 0, 0),
-              gr::io_signature::make(1, 1, sizeof(uint8_t)))
+              gr::io_signature::make(1, channel_count, sizeof(uint8_t))),
+        m_channel_count(channel_count)
     {
       // Register nordictap input, which accepts packets to transmit 
       message_port_register_in(pmt::intern("nordictap_in"));
@@ -69,7 +70,7 @@ namespace gr {
         gr_vector_const_void_star &input_items,
         gr_vector_void_star &output_items)
     {
-      uint8_t *out = (uint8_t *) output_items[0];
+      // uint8_t *out = (uint8_t *) output_items[0];
 
       // Check for new input 
       if(m_tx_queue.size())
@@ -78,17 +79,20 @@ namespace gr {
         std::vector<uint8_t> vec = pmt::u8vector_elements(m_tx_queue.front());
         uint8_t * blob = vec.data();
 
+        // Read the channel index
+        uint8_t channel = blob[0];
+
         // Read the nordictap header, address, and payload
         nordictap_header header;
-        memcpy(&header, blob, sizeof(nordictap_header));
+        memcpy(&header, &blob[1], sizeof(nordictap_header));
 
         // Read the address and payload
         const uint8_t alen = header.address_length;
         const uint8_t plen = header.payload_length;
         uint8_t * address = new uint8_t[alen];
         uint8_t * payload = new uint8_t[plen];
-        memcpy(address, &blob[sizeof(nordictap_header)], alen);
-        memcpy(payload, &blob[sizeof(nordictap_header) + alen], plen);
+        memcpy(address, &blob[sizeof(nordictap_header)+1], alen);
+        memcpy(payload, &blob[sizeof(nordictap_header)+1 + alen], plen);
 
         // Build the packet
         enhanced_shockburst_packet * packet = 
@@ -104,10 +108,20 @@ namespace gr {
         m_tx_queue.pop();
 
         // Write the output bytes
+        uint8_t * out = (uint8_t *)output_items[channel];
         for(int b = 0; b < packet->bytes_length(); b++)
         {
           out[b] = packet->bytes()[b];
           out[packet->bytes_length()*2+b] = packet->bytes()[b];
+        }
+
+        // Write zeros to the other channels' buffers
+        for(int c = 0; c < m_channel_count; c++)
+        {
+          if(c != channel)
+          {
+            memset(output_items[c], 0, packet->bytes_length()*2);
+          }
         }
 
         // Return the number of bytes produced

@@ -111,8 +111,6 @@ bool enhanced_shockburst_packet::try_parse(const uint8_t * bytes,
   crc = crc_update(crc, bytes[7 + payload_length] & 0x80, 1);
   crc = htons(crc);
 
-  // printf("CRCCRCCRC %04X, %04X\n", crc, crc_given);
-
   // Validate the CRC
   if(memcmp(&crc, &crc_given, 2) != 0) return false;
 
@@ -150,7 +148,6 @@ void enhanced_shockburst_packet::print()
   printf("\n");
 
   printf("\n");
-
 }
 
 // Process a crc byte (or partial byte)

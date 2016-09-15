@@ -46,7 +46,7 @@ namespace gr {
        * class. nordic::nordic_tx::make is the public interface for
        * creating new instances.
        */
-      static sptr make();
+      static sptr make(uint8_t channel_count=1);
     };
 
   } // namespace nordic

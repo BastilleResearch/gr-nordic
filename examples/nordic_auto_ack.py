@@ -125,7 +125,7 @@ class nordictap_ack_handler(gr.sync_block):
             print 'CRC=' + ':'.join('%02X' % ord(b) for b in crc)
 
             # Build an ACK
-            nordictap = [4, 2, 5, 0, sequence_number, 0, 2]
+            nordictap = [0] + [4, 2, 5, 0, sequence_number, 0, 2]
             for c in address:
                 nordictap.append(ord(c))
 
