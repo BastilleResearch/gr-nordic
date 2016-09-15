@@ -40,6 +40,18 @@ Microsoft mouse/keyboard following receiver. When launched, this script will swe
 
 ```./microsoft_mouse_sniffer.py ```
 
+### nordic_channelized_receiver.py
+
+Channelized receiver example, which tunes to 2414MHz, and receives 2Mbps Enhanced Shockburst packets on channels 10, 14, and 18. 
+
+```./nordic_channelized_receiver.py ```
+
+### nordic_channelized_transmitter.py
+
+Channelized transmitter example, which tunes to 2414MHz, and transmits 2Mbps Enhanced Shockburst packets on channels 10, 14, and 18. 
+
+```./nordic_channelized_transmitter.py ```
+
 ## wireshark dissector
 
 The wireshark dissector will display Enhanced Shockburst packets in Wireshark. The logic is very straightforward, and will be simple to extend to classify various device types. 
