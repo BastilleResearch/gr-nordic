@@ -1,17 +1,17 @@
 /* -*- c++ -*- */
-/* 
- * Copyright 2016 <+YOU OR YOUR COMPANY+>.
- * 
+/*
+ * Copyright 2016 Bastille Networks.
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3, or (at your option)
  * any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; see the file COPYING.  If not, write to
  * the Free Software Foundation, Inc., 51 Franklin Street,
@@ -47,7 +47,7 @@ namespace gr {
               gr::io_signature::make(1, channel_count, sizeof(uint8_t))),
         m_channel_count(channel_count)
     {
-      // Register nordictap input, which accepts packets to transmit 
+      // Register nordictap input, which accepts packets to transmit
       message_port_register_in(pmt::intern("nordictap_in"));
       set_msg_handler(pmt::intern("nordictap_in"), boost::bind(&nordic_tx_impl::nordictap_message_handler, this, _1));
     }
@@ -72,7 +72,7 @@ namespace gr {
     {
       // uint8_t *out = (uint8_t *) output_items[0];
 
-      // Check for new input 
+      // Check for new input
       if(m_tx_queue.size())
       {
         // Get the blob
@@ -95,8 +95,8 @@ namespace gr {
         memcpy(payload, &blob[sizeof(nordictap_header)+1 + alen], plen);
 
         // Build the packet
-        enhanced_shockburst_packet * packet = 
-          new enhanced_shockburst_packet(header.address_length, 
+        enhanced_shockburst_packet * packet =
+          new enhanced_shockburst_packet(header.address_length,
                                          header.payload_length,
                                          header.sequence_number,
                                          header.no_ack,
