@@ -87,7 +87,7 @@ enhanced_shockburst_packet::enhanced_shockburst_packet(uint8_t address_length,
 }
 
 // Destructur
-enhanced_shockburst_packet::~enhanced_shockburst_packet();
+enhanced_shockburst_packet::~enhanced_shockburst_packet()
 {
   delete[] m_address;
   delete[] m_payload;
