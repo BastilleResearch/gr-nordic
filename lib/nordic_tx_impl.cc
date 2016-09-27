@@ -124,6 +124,11 @@ namespace gr {
           }
         }
 
+        // Cleanup
+        delete[] address;
+        delete[] payload;
+        delete packet;
+
         // Return the number of bytes produced
         return packet->bytes_length()*2;
       }

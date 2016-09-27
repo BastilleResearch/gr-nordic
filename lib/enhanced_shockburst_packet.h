@@ -1,17 +1,17 @@
 /* -*- c++ -*- */
-/* 
+/*
  * Copyright 2016 Bastille Networks
- * 
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3, or (at your option)
  * any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; see the file COPYING.  If not, write to
  * the Free Software Foundation, Inc., 51 Franklin Street,
@@ -29,14 +29,17 @@ class enhanced_shockburst_packet
 public:
 
   // Constructor
-  enhanced_shockburst_packet(uint8_t address_length, 
-                             uint8_t payload_length, 
+  enhanced_shockburst_packet(uint8_t address_length,
+                             uint8_t payload_length,
                              uint8_t sequence_number,
                              uint8_t no_ack,
                              uint8_t crc_length,
-                             uint8_t * address, 
+                             uint8_t * address,
                              uint8_t * payload
                              );
+
+  // Destructur
+  ~enhanced_shockburst_packet();
 
   // Attempt to parse a packet from some incoming bytes
   static bool try_parse(const uint8_t * bytes,
@@ -46,7 +49,7 @@ public:
                         enhanced_shockburst_packet *& packet);
 
   // Process a crc byte (or partial byte)
-  static uint16_t crc_update (uint16_t crc, uint8_t data, uint8_t bits=8);    
+  static uint16_t crc_update (uint16_t crc, uint8_t data, uint8_t bits=8);
 
   // Print the packet details to standard out
   void print();

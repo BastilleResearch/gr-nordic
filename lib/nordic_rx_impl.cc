@@ -1,17 +1,17 @@
 /* -*- c++ -*- */
-/* 
+/*
  * Copyright 2016 Bastille Networks.
- * 
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3, or (at your option)
  * any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; see the file COPYING.  If not, write to
  * the Free Software Foundation, Inc., 51 Franklin Street,
@@ -44,8 +44,8 @@ namespace gr {
     /*
      * The private constructor
      */
-    nordic_rx_impl::nordic_rx_impl(uint8_t channel, 
-                                   uint8_t address_length, 
+    nordic_rx_impl::nordic_rx_impl(uint8_t channel,
+                                   uint8_t address_length,
                                    uint8_t crc_length,
                                    uint8_t data_rate)
       : gr::sync_block("nordic_rx",
@@ -89,8 +89,8 @@ namespace gr {
           if((bytes[0] & 0x80) == (bytes[1] & 0x80))
           {
             // Attempt to decode a payload
-            if(enhanced_shockburst_packet::try_parse(bytes, 
-                                                     m_decoded_bits_bytes.bytes(0), 
+            if(enhanced_shockburst_packet::try_parse(bytes,
+                                                     m_decoded_bits_bytes.bytes(0),
                                                      m_address_length,
                                                      m_crc_length,
                                                      m_enhanced_shockburst))
@@ -123,7 +123,10 @@ namespace gr {
               socket.send_to(boost::asio::buffer(buffer, buffer_length), receiver_endpoint);
 
               // Send the packet to nordictap_out
-              message_port_pub(pmt::intern("nordictap_out"), pmt::init_u8vector(buffer_length, buffer));              
+              message_port_pub(pmt::intern("nordictap_out"), pmt::init_u8vector(buffer_length, buffer));
+
+              // Cleanup
+              delete[] buffer;
             }
           }
         }
@@ -134,14 +137,14 @@ namespace gr {
 
     // Channel getter
     uint8_t nordic_rx_impl::get_channel()
-    { 
-      return m_channel; 
+    {
+      return m_channel;
     }
 
     // Channel setter
     void nordic_rx_impl::set_channel(uint8_t channel)
-    { 
-      m_channel = channel; 
+    {
+      m_channel = channel;
     }
 
   } /* namespace nordic */

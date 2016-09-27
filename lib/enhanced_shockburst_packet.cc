@@ -1,17 +1,17 @@
 /* -*- c++ -*- */
-/* 
+/*
  * Copyright 2016 Bastille Networks
- * 
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3, or (at your option)
  * any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; see the file COPYING.  If not, write to
  * the Free Software Foundation, Inc., 51 Franklin Street,
@@ -25,14 +25,14 @@
 
 #include "enhanced_shockburst_packet.h"
 
-enhanced_shockburst_packet::enhanced_shockburst_packet(uint8_t address_length, 
-                                                       uint8_t payload_length, 
+enhanced_shockburst_packet::enhanced_shockburst_packet(uint8_t address_length,
+                                                       uint8_t payload_length,
                                                        uint8_t sequence_number,
                                                        uint8_t no_ack,
                                                        uint8_t crc_length,
-                                                       uint8_t * address, 
+                                                       uint8_t * address,
                                                        uint8_t * payload
-                                                       ) : 
+                                                       ) :
   m_address_length(address_length),
   m_payload_length(payload_length),
   m_sequence_number(sequence_number),
@@ -49,14 +49,14 @@ enhanced_shockburst_packet::enhanced_shockburst_packet(uint8_t address_length,
   memcpy(m_payload, payload, m_payload_length);
 
   // Build the packet bytes
-  const int blen = 3 /* preamble + PCF */ + 
-                   m_crc_length + 
-                   m_address_length + 
+  const int blen = 3 /* preamble + PCF */ +
+                   m_crc_length +
+                   m_address_length +
                    m_payload_length;
   m_packet_length_bytes = blen;
   m_packet_length_bits = blen*8;
   m_packet_bytes = new uint8_t[blen];
-  
+
   // Preamble
   if((address[0] & 0x80) == 0x80) m_packet_bytes[0] = 0xAA;
   else m_packet_bytes[0] = 0x55;
@@ -86,9 +86,17 @@ enhanced_shockburst_packet::enhanced_shockburst_packet(uint8_t address_length,
   m_packet_bytes[4 + m_address_length + m_payload_length] |= ((crc << 7) & 0x80);
 }
 
+// Destructur
+enhanced_shockburst_packet::~enhanced_shockburst_packet();
+{
+  delete[] m_address;
+  delete[] m_payload;
+  delete[] m_crc;
+}
+
 // Attempt to parse a packet from some incoming bytes
-bool enhanced_shockburst_packet::try_parse(const uint8_t * bytes, 
-                                           const uint8_t * bytes_shifted, 
+bool enhanced_shockburst_packet::try_parse(const uint8_t * bytes,
+                                           const uint8_t * bytes_shifted,
                                            uint8_t address_length,
                                            uint8_t crc_length,
                                            enhanced_shockburst_packet *& packet)
@@ -112,10 +120,14 @@ bool enhanced_shockburst_packet::try_parse(const uint8_t * bytes,
   crc = htons(crc);
 
   // Validate the CRC
-  if(memcmp(&crc, &crc_given, 2) != 0) return false;
+  if(memcmp(&crc, &crc_given, 2) != 0)
+  {
+    delete[] address;
+    return false;
+  }
 
   // Read the sequence number and no-ACK bit
-  uint8_t seq = bytes[6] & 0x3; 
+  uint8_t seq = bytes[6] & 0x3;
   uint8_t no_ack = bytes[7] >> 7;
 
   // Read the payload
@@ -124,6 +136,9 @@ bool enhanced_shockburst_packet::try_parse(const uint8_t * bytes,
 
   // Update the fields
   packet = new enhanced_shockburst_packet(address_length, payload_length, seq, no_ack, crc_length, address, payload);
+
+  // Cleanup
+  delete[] address;
 
   return true;
 }
