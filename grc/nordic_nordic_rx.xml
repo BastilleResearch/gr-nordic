@@ -1,38 +1,78 @@
 <?xml version="1.0"?>
 <block>
-  <name>nordic_rx</name>
+  <name>Nordic Receiver</name>
   <key>nordic_nordic_rx</key>
-  <category>nordic</category>
+  <category>[Bastille Research]/Nordic</category>
   <import>import nordic</import>
-  <make>nordic.nordic_rx()</make>
-  <!-- Make one 'param' node for every Parameter you want settable from the GUI.
-       Sub-nodes:
-       * name
-       * key (makes the value accessible as $keyname, e.g. in the make node)
-       * type -->
+  <make>nordic.nordic_rx($channel, $address_length, $crc_length, $data_rate)</make>
+
   <param>
-    <name>...</name>
-    <key>...</key>
-    <type>...</type>
+    <name>Channel</name>
+    <key>channel</key>
+    <type>int</type>
   </param>
 
-  <!-- Make one 'sink' node per input. Sub-nodes:
-       * name (an identifier for the GUI)
-       * type
-       * vlen
-       * optional (set to 1 for optional inputs) -->
+  <param>
+    <name>Address Length</name>
+    <key>address_length</key>
+    <type>enum</type>
+
+    <option>
+      <name>3 Bytes</name>
+      <key>3</key>
+    </option>
+    <option>
+      <name>4 Bytes</name>
+      <key>4</key>
+    </option>
+    <option>
+      <name>5 Bytes</name>
+      <key>5</key>
+    </option>
+  </param>
+
+  <param>
+    <name>CRC Length</name>
+    <key>crc_length</key>
+    <type>enum</type>
+
+    <option>
+      <name>1 Byte</name>
+      <key>1</key>
+    </option>
+    <option>
+      <name>2 Bytes</name>
+      <key>2</key>
+    </option>
+  </param>
+
+  <param>
+    <name>Data Rate</name>
+    <key>data_rate</key>
+    <type>enum</type>
+
+    <option>
+      <name>250K</name>
+      <key>0</key>
+    </option>
+    <option>
+      <name>1M</name>
+      <key>1</key>
+    </option>
+    <option>
+      <name>2M</name>
+      <key>2</key>
+    </option>
+  </param>
+
   <sink>
     <name>in</name>
-    <type><!-- e.g. int, float, complex, byte, short, xxx_vector, ...--></type>
+    <type>byte</type>
   </sink>
 
-  <!-- Make one 'source' node per output. Sub-nodes:
-       * name (an identifier for the GUI)
-       * type
-       * vlen
-       * optional (set to 1 for optional inputs) -->
   <source>
-    <name>out</name>
-    <type><!-- e.g. int, float, complex, byte, short, xxx_vector, ...--></type>
+    <name>nordictap_out</name>
+    <type>message</type>
+    <optional>1</optional>
   </source>
 </block>
