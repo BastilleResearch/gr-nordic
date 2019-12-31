@@ -1,8 +1,8 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 from gnuradio import gr, blocks, digital, filter
 from gnuradio.filter import firdes
-import thread
+import _thread
 import nordic
 import pmt
 import struct
@@ -14,7 +14,7 @@ import osmosdr
 import argparse
 from bitstring import BitArray
 from gnuradio import uhd
-from Queue import Queue
+from queue import Queue
 
 
 class top_block(gr.top_block):
@@ -122,7 +122,7 @@ def main():
             time.sleep(0.1)
 
     try:
-        raw_input('Press Enter to quit: ')
+        input('Press Enter to quit: ')
     except EOFError:
         pass
     tb.stop()

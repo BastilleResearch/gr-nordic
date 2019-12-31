@@ -1,8 +1,8 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 from gnuradio import gr, blocks, digital, filter
 from gnuradio.filter import firdes
-import thread
+import _thread
 import nordic
 import pmt
 import struct
@@ -13,7 +13,7 @@ import osmosdr
 import argparse
 from bitstring import BitArray
 from gnuradio import uhd
-from Queue import Queue
+from queue import Queue
 
 
 class top_block(gr.top_block):
@@ -93,11 +93,11 @@ class nordictap_printer(gr.sync_block):
                    7 + address_length + payload_length + crc_length]
 
         # Print the channel, sequence number, address and payload
-        print 'CH=' + str(2400 + channel),
-        print 'SEQ=' + str(sequence_number),
-        print 'ADDR=' + ':'.join('%02X' % ord(b) for b in address),
-        print 'PLD=' + ':'.join('%02X' % ord(b) for b in payload),
-        print 'CRC=' + ':'.join('%02X' % ord(b) for b in crc)
+        print('CH=' + str(2400 + channel), end=' ')
+        print('SEQ=' + str(sequence_number), end=' ')
+        print('ADDR=' + ':'.join('%02X' % ord(b) for b in address), end=' ')
+        print('PLD=' + ':'.join('%02X' % ord(b) for b in payload), end=' ')
+        print('CRC=' + ':'.join('%02X' % ord(b) for b in crc))
 
 
 def main():
@@ -123,7 +123,7 @@ def main():
     tb = top_block(args)
     tb.start()
     try:
-        raw_input('Press Enter to quit: ')
+        input('Press Enter to quit: ')
     except EOFError:
         pass
     tb.stop()

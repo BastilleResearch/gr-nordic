@@ -1,8 +1,8 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 from gnuradio import gr, blocks, digital, filter
 from gnuradio.filter import firdes
-import thread
+import _thread
 import osmosdr
 import nordic
 import pmt
@@ -73,7 +73,7 @@ class microsoft_nordictap_handler(gr.sync_block):
         self.last_tune = time.time()
         self.ch_timeout = 0.4  # timeout a channel after 200ms
         self.last_ch = 0
-        thread.start_new_thread(self.tick, ())
+        _thread.start_new_thread(self.tick, ())
 
         # Channels and channel groups
         self.channels = [3, 29, 21, 5, 23, 17, 19, 50, 31, 25,
@@ -100,7 +100,7 @@ class microsoft_nordictap_handler(gr.sync_block):
                 self.last_ch += 1
                 if self.last_ch >= len(self.channels):
                     self.last_ch = 0
-                print 'Tuning to 24%02i MHz' % self.channels[self.last_ch]
+                print('Tuning to 24%02i MHz' % self.channels[self.last_ch])
                 self.last_tune = time.time()
                 self.tb.set_channel(self.channels[self.last_ch])
 
@@ -149,18 +149,18 @@ class microsoft_nordictap_handler(gr.sync_block):
             self.last_rx = time.time()
 
             # Print the channel, sequence number, address and payload
-            print 'CH=' + str(2400 + channel),
-            print 'SEQ=' + str(sequence_number),
-            print 'ADDR=' + ':'.join('%02X' % ord(b) for b in address),
-            print 'PLD=' + ':'.join('%02X' % ord(b) for b in payload),
-            print 'CRC=' + ':'.join('%02X' % ord(b) for b in crc)
+            print('CH=' + str(2400 + channel), end=' ')
+            print('SEQ=' + str(sequence_number), end=' ')
+            print('ADDR=' + ':'.join('%02X' % ord(b) for b in address), end=' ')
+            print('PLD=' + ':'.join('%02X' % ord(b) for b in payload), end=' ')
+            print('CRC=' + ':'.join('%02X' % ord(b) for b in crc))
 
 
 def main():
     tb = top_block()
     tb.start()
     try:
-        raw_input('Press Enter to quit: ')
+        input('Press Enter to quit: ')
     except EOFError:
         pass
     tb.stop()

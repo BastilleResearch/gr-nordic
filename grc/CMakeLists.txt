@@ -13,6 +13,6 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 install(FILES
-    nordic_nordic_rx.xml
-    nordic_nordic_tx.xml DESTINATION share/gnuradio/grc/blocks
+    nordic_nordic_rx.block.yml
+    nordic_nordic_tx.block.yml DESTINATION share/gnuradio/grc/blocks
 )

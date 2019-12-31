@@ -25,7 +25,7 @@ description here (python/__init__.py).
 # import swig generated symbols into the nordic namespace
 try:
 	# this might fail if the module is python-only
-	from nordic_swig import *
+	from nordic.nordic_swig import *
 except ImportError:
 	pass
 

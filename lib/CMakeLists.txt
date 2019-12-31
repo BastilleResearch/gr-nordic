@@ -33,7 +33,11 @@ if(NOT nordic_sources)
 endif(NOT nordic_sources)
 
 add_library(gnuradio-nordic SHARED ${nordic_sources})
-target_link_libraries(gnuradio-nordic ${Boost_LIBRARIES} ${GNURADIO_ALL_LIBRARIES})
+target_link_libraries(gnuradio-nordic ${Boost_LIBRARIES} gnuradio::gnuradio-runtime gnuradio::gnuradio-blocks gnuradio::gnuradio-filter gnuradio::gnuradio-blocks gnuradio::gnuradio-fft volk)
+target_include_directories(gnuradio-nordic
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+    PUBLIC $<INSTALL_INTERFACE:include>
+  )
 set_target_properties(gnuradio-nordic PROPERTIES DEFINE_SYMBOL "gnuradio_nordic_EXPORTS")
 
 if(APPLE)
@@ -63,14 +67,6 @@ list(APPEND test_nordic_sources
     ${CMAKE_CURRENT_SOURCE_DIR}/qa_nordic.cc
 )
 
-add_executable(test-nordic ${test_nordic_sources})
+list(APPEND GR_TEST_TARGET_DEPS nordic)
 
-target_link_libraries(
-  test-nordic
-  ${GNURADIO_RUNTIME_LIBRARIES}
-  ${Boost_LIBRARIES}
-  ${CPPUNIT_LIBRARIES}
-  gnuradio-nordic
-)
 
-GR_ADD_TEST(test_nordic test-nordic)
