@@ -1,0 +1,31 @@
+id: nordic_nordic_rx
+label: nordic rx
+category: '[Nordic]'
+templates:
+  imports: import nordic
+  make: nordic.nordic_rx(${channel}, ${address_length}, ${crc_length}, ${data_rate})
+parameters:
+- id: channel
+  label: Channel
+  default: '0'
+  dtype: int
+- id: address_length
+  label: Address_length
+  default: '5'
+  dtype: int
+- id: crc_length
+  label: Crc_length
+  default: '2'
+  dtype: int
+- id: data_rate
+  label: Data_rate
+  default: '0'
+  dtype: int
+inputs:
+- label: in
+  domain: stream
+  dtype: byte
+outputs:
+- label: nordictap_out
+  domain: message
+file_format: 1

@@ -1,0 +1,34 @@
+id: nordic_nordictap_transmitter
+label: nordictap_transmitter
+category: '[Nordic]'
+templates:
+  imports: import nordic
+  make: nordic.nordictap_transmitter(${channel_count}, ${address}, ${payload}, ${channel_index}, ${sequence_number})
+parameters:
+- id: channel_count
+  label: Channel Count
+  default: '4'
+  dtype: int 
+- id: address
+  label: Address
+  default: '\x55\x55\x55\x55\x55'
+  dtype: string 
+- id: payload
+  label: Payload
+  default: '\xAA\xAA\xAA\xAA\xAA'
+  dtype: string
+- id: channel_index
+  label: Channel Index
+  default: '0'
+  dtype: int
+- id: sequence_number
+  label: Sequence Number
+  default: '0'
+  dtype: int
+inputs:
+- label: trig
+  domain: message
+outputs: 
+- label: nordictap_out
+  domain: message
+file_format: 1
