@@ -56,6 +56,7 @@ public:
 
   // Getters
   const uint8_t payload_length() { return m_payload_length; }
+  //const uint8_t address_length() { return m_address_length; }
   const uint8_t bytes_length() { return m_packet_length_bytes; }
   const uint8_t sequence_number() { return m_sequence_number; }
   const uint8_t no_ack() { return m_no_ack; }

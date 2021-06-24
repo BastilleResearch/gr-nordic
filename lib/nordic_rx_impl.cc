@@ -95,6 +95,10 @@ namespace gr {
                                                      m_crc_length,
                                                      m_enhanced_shockburst))
             {
+              //enhanced_shockburst_packet::print();
+              
+              
+              
               // Build the wireshark header
               nordictap_header header;
               header.channel = m_channel;
@@ -112,6 +116,9 @@ namespace gr {
               memcpy(&buffer[sizeof(nordictap_header)], m_enhanced_shockburst->address(), m_address_length);
               memcpy(&buffer[sizeof(nordictap_header) + m_address_length], m_enhanced_shockburst->payload(), header.payload_length);
               memcpy(&buffer[sizeof(nordictap_header) + m_address_length + header.payload_length], m_enhanced_shockburst->crc(), m_crc_length);
+              
+              //printf("Buffer=%s", buffer);
+              //printf("\n");
 
               // Send the packet to wireshark
               boost::asio::io_service io_service;

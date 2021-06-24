@@ -160,7 +160,7 @@ void enhanced_shockburst_packet::print()
 
   printf("Bytes:   ");
   for(int x = 0; x < m_packet_length_bytes; x++) printf("%02X ", m_packet_bytes[x]);
-  printf("\n");
+  printf("\n"); 
 
   printf("\n");
 }
