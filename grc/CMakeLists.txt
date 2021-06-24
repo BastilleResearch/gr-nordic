@@ -14,5 +14,7 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 install(FILES
     nordic_nordic_rx.xml
+    nordic_nordictap_transmitter.xml
+    nordic_nordictap_printer.xml
     nordic_nordic_tx.xml DESTINATION share/gnuradio/grc/blocks
 )

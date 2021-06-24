@@ -17,7 +17,7 @@ class top_block(gr.top_block):
 
         # SDR configuration
         self.freq = 2402e6
-        self.gain = 70
+        self.gain = 60
         self.symbol_rate = 2e6
         self.sample_rate = 4e6
 
@@ -30,7 +30,7 @@ class top_block(gr.top_block):
 
         # Low pass filter
         self.lpf = filter.fir_filter_ccf(
-            1, firdes.low_pass_2(1, self.sample_rate, self.symbol_rate / 2, 50e3, 50))
+            1, firdes.low_pass_2(1, self.sample_rate, self.symbol_rate / 2, 100e3, 50))
 
         # GFSK demod, defaults to 2 samples per symbol
         self.gfsk_demod = digital.gfsk_demod()
@@ -76,7 +76,7 @@ class microsoft_nordictap_handler(gr.sync_block):
         thread.start_new_thread(self.tick, ())
 
         # Channels and channel groups
-        self.channels = range(2, 84)
+        self.channels = range(2, 102)
 
     # 10ms tick
     def tick(self):

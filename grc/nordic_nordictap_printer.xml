@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<block>
+  <name>nordictap_printer</name>
+  <key>nordic_nordictap_printer</key>
+  <category>[Nordic]</category>
+  <category>nordic</category>
+  <import>import nordic</import>
+  <make>nordic.nordictap_printer()</make>
+ <sink>
+    <name>nordictap_in</name>
+     <type>message</type>
+ </sink>
+</block>

@@ -11,6 +11,7 @@ import numpy
 import array
 import random
 import osmosdr
+from gnuradio import iio
 import argparse
 from bitstring import BitArray
 from gnuradio import uhd
@@ -40,6 +41,7 @@ class top_block(gr.top_block):
         self.osmosdr_sink.set_center_freq(self.freq)
         self.osmosdr_sink.set_gain(self.gain)
         self.osmosdr_sink.set_antenna('TX/RX')
+        #self.pluto_sink = iio.pluto_sink('192.168.2.1', int(self.freq), int(int(self.sample_rate * channel_count)), int(2e6), 0x8000, False, 10.0, '', True)
 
         # PFB channelizer
         taps = firdes.low_pass_2(
@@ -47,52 +49,27 @@ class top_block(gr.top_block):
         self.synthesizer = filter.pfb_synthesizer_ccf(channel_count, taps)
 
         # Modulators and packet framers
-        self.nordictap_transmitter = nordictap_transmitter(channel_map)
+        self.nordictap_transmitter = nordic.nordictap_transmitter(channel_map)
         self.mods = []
         self.tx = nordic.nordic_tx(channel_count)
         for x in range(channel_count):
-            self.mods.append(digital.gfsk_mod())
+            self.mods.append(digital.gfsk_mod(
+                samples_per_symbol=2,
+        	    sensitivity=1.0,
+        	    bt=0.35,
+        	    verbose=True,
+        	    log=True,))
             self.connect((self.tx, x), self.mods[x])
             self.connect(self.mods[x], (self.synthesizer, x))
         self.connect(self.synthesizer, self.osmosdr_sink)
 
-        # Wire up output packet connection
+        self.blocks_message_debug = blocks.message_debug()
+
+        # Wire up output packet connection   
         self.msg_connect(self.nordictap_transmitter,
                          "nordictap_out", self.tx, "nordictap_in")
-
-
-# Nordic transmitter strobe
-class nordictap_transmitter(gr.sync_block):
-
-    # Constructor
-
-    def __init__(self, channel_map):
-        gr.sync_block.__init__(
-            self, name="Nordictap Printer/Transmitter", in_sig=None, out_sig=None)
-
-        self.channel_map = channel_map
-
-        # Packet output port
-        self.message_port_register_out(pmt.intern("nordictap_out"))
-
-    # Transmit a packet
-    def transmit(self, address, payload, channel_index, sequence_number):
-
-        channel = self.channel_map[channel_index]
-
-        # Build a payload
-        nordictap = [channel_index] + [
-            channel, 2, len(address), len(payload), sequence_number, 0, 2]
-        for c in address:
-            nordictap.append(ord(c))
-        for c in payload:
-            nordictap.append(ord(c))
-
-        # Transmit packet
-        vec = pmt.make_u8vector(len(nordictap), 0)
-        for x in range(len(nordictap)):
-            pmt.u8vector_set(vec, x, nordictap[x])
-        self.message_port_pub(pmt.intern("nordictap_out"), vec)
+        self.msg_connect(self.nordictap_transmitter,
+                         "nordictap_out", self.blocks_message_debug, "print")
 
 
 def main():
@@ -109,8 +86,8 @@ def main():
     tb.start()
 
     # Transmit some packets, hopping between three channels
-    address = '\x11\x22\x11\x22\x11'
-    payload = '\x55\x44\x33\x22\x11'
+    address = '\x55\x55\x55\x55\x55'
+    payload = '\xAA\xAA\xAA\xAA\xAA\xAA\xAA\xAA\xAA\xAA'
     sequence_number = 0
     while True:
         for x in range(3):
@@ -119,7 +96,7 @@ def main():
             sequence_number += 1
             if sequence_number > 3:
                 sequence_number = 0
-            time.sleep(0.1)
+            time.sleep(0.2)
 
     try:
         raw_input('Press Enter to quit: ')

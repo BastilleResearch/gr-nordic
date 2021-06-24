@@ -2,6 +2,7 @@
 
 from gnuradio import gr, blocks, digital, filter
 from gnuradio.filter import firdes
+from gnuradio import iio
 import thread
 import nordic
 import pmt
@@ -34,11 +35,13 @@ class top_block(gr.top_block):
         dr = 2  # 2M
 
         # SDR source (gr-osmosdr source)
-        self.osmosdr_source = osmosdr.source()
-        self.osmosdr_source.set_sample_rate(self.sample_rate * channel_count)
-        self.osmosdr_source.set_center_freq(self.freq)
-        self.osmosdr_source.set_gain(self.gain)
-        self.osmosdr_source.set_antenna('TX/RX')
+        #self.osmosdr_source = osmosdr.source()
+        #self.osmosdr_source.set_sample_rate(self.sample_rate * channel_count)
+        #self.osmosdr_source.set_center_freq(self.freq)
+        #self.osmosdr_source.set_gain(self.gain)
+        #self.osmosdr_source.set_antenna('TX/RX')
+        self.pluto_source = iio.pluto_source('', int(self.freq), int(int(self.sample_rate * channel_count)), int(2e6), 0x8000, True, True, True, "manual", 64.0, '', True)
+        #self.pluto_sink = iio.pluto_sink('192.168.2.1', int(self.freq), int(int(self.sample_rate * channel_count)), int(2e6), 0x8000, False, 10.0, '', True)
 
         # PFB channelizer
         taps = firdes.low_pass_2(
@@ -48,7 +51,7 @@ class top_block(gr.top_block):
         # Stream to streams (PFB channelizer input)
         self.s2ss = blocks.stream_to_streams(
             gr.sizeof_gr_complex, channel_count)
-        self.connect(self.osmosdr_source, self.s2ss)
+        self.connect(self.pluto_source, self.s2ss)
 
         # Demodulators and packet deframers
         self.nordictap_printer = nordictap_printer()

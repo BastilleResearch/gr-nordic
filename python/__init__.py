@@ -26,6 +26,8 @@ description here (python/__init__.py).
 try:
 	# this might fail if the module is python-only
 	from nordic_swig import *
+        # import any pure python here
+        from nordic_blocks import nordictap_transmitter, nordictap_printer
 except ImportError:
 	pass
 

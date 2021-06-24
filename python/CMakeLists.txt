@@ -27,6 +27,7 @@ endif()
 GR_PYTHON_INSTALL(
     FILES
     __init__.py
+    nordic_blocks.py
     DESTINATION ${GR_PYTHON_DIR}/nordic
 )
 

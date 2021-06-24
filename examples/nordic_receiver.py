@@ -2,6 +2,7 @@
 
 from gnuradio import gr, blocks, digital, filter
 from gnuradio.filter import firdes
+from gnuradio import iio
 import thread
 import nordic
 import pmt
@@ -13,7 +14,7 @@ import osmosdr
 import argparse
 from bitstring import BitArray
 from gnuradio import uhd
-from Queue import Queue
+#from Queue import Queue
 
 
 class top_block(gr.top_block):
@@ -28,11 +29,12 @@ class top_block(gr.top_block):
         self.sample_rate = args.data_rate * args.samples_per_symbol
 
         # SDR source (gr-osmosdr source)_tx_queue.push(msg);
-        self.osmosdr_source = osmosdr.source()
-        self.osmosdr_source.set_sample_rate(self.sample_rate)
-        self.osmosdr_source.set_center_freq(self.freq)
-        self.osmosdr_source.set_gain(self.gain)
-        self.osmosdr_source.set_antenna('TX/RX')
+        #self.osmosdr_source = osmosdr.source()
+        #self.osmosdr_source.set_sample_rate(self.sample_rate)
+        #self.osmosdr_source.set_center_freq(self.freq)
+        #self.osmosdr_source.set_gain(self.gain)
+        #self.osmosdr_source.set_antenna('TX/RX')
+        self.pluto_source = iio.pluto_source('', int(self.freq), int(self.sample_rate), int(2e6), 0x8000, True, True, True, "manual", 60.0, '', True)
 
         # Receive chain
         dr = 0
@@ -45,8 +47,8 @@ class top_block(gr.top_block):
         self.gfsk_demod = digital.gfsk_demod(
             samples_per_symbol=args.samples_per_symbol)
         self.lpf = filter.fir_filter_ccf(
-            1, firdes.low_pass_2(1, self.sample_rate, self.symbol_rate / 2, 50e3, 50))
-        self.connect(self.osmosdr_source, self.lpf)
+            1, firdes.low_pass_2(1, self.sample_rate, self.symbol_rate / 2, 100e3, 50))
+        self.connect(self.pluto_source, self.lpf)
         self.connect(self.lpf, self.gfsk_demod)
         self.connect(self.gfsk_demod, self.rx)
 
@@ -56,7 +58,7 @@ class top_block(gr.top_block):
             self.rx, "nordictap_out", self.nordictap_printer, "nordictap_in")
 
 
-# Nordic Printer
+# Nordic Printeror
 class nordictap_printer(gr.sync_block):
 
     # Constructor

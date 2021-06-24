@@ -2,37 +2,39 @@
 <block>
   <name>nordic_rx</name>
   <key>nordic_nordic_rx</key>
-  <category>nordic</category>
+  <category>[Nordic]</category>
   <import>import nordic</import>
-  <make>nordic.nordic_rx()</make>
-  <!-- Make one 'param' node for every Parameter you want settable from the GUI.
-       Sub-nodes:
-       * name
-       * key (makes the value accessible as $keyname, e.g. in the make node)
-       * type -->
+  <make>nordic.nordic_rx($channel, $address_length, $crc_length, $data_rate)</make>
   <param>
-    <name>...</name>
-    <key>...</key>
-    <type>...</type>
+    <name>RF Channel</name>
+    <key>channel</key>
+    <value>85</value>
+    <type>int</type>
   </param>
-
-  <!-- Make one 'sink' node per input. Sub-nodes:
-       * name (an identifier for the GUI)
-       * type
-       * vlen
-       * optional (set to 1 for optional inputs) -->
+ <param>
+    <name>Address Length</name>
+    <key>address_length</key>
+    <value>5</value>
+    <type>int</type>
+  </param>
+  <param>
+    <name>CRC Length</name>
+    <key>crc_length</key>
+    <value>2</value>
+    <type>int</type>
+  </param>
+  <param>
+    <name>Data Rate</name>
+    <key>data_rate</key>
+    <value>2</value>
+    <type>int</type>
+  </param>
   <sink>
     <name>in</name>
-    <type><!-- e.g. int, float, complex, byte, short, xxx_vector, ...--></type>
+    <type>byte</type>
   </sink>
-
-  <!-- Make one 'source' node per output. Sub-nodes:
-       * name (an identifier for the GUI)
-       * type
-       * vlen
-       * optional (set to 1 for optional inputs) -->
   <source>
-    <name>out</name>
-    <type><!-- e.g. int, float, complex, byte, short, xxx_vector, ...--></type>
+    <name>nordictap_out</name>
+    <type>message</type>
   </source>
 </block>
