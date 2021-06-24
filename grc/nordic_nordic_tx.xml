@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<block>
+  <name>nordic_tx</name>
+  <key>nordic_nordic_tx</key>
+  <category>[Nordic]</category>
+  <import>import nordic</import>
+  <make>nordic.nordic_tx($channel_count)</make>
+ 
+ <param>
+   <name>Number of channels</name>
+   <key>channel_count</key>
+   <value>1</value>
+   <type>int</type>
+ </param>
+
+ <sink>
+    <name>nordictap_in</name>
+    <type>message</type>
+ </sink>
+
+ <source>
+    <name>out</name>
+     <type>byte</type>
+    <nports>$channel_count</nports>
+ </source>
+</block>

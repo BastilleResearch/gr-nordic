@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<block>
+  <name>nordic_rx</name>
+  <key>nordic_nordic_rx</key>
+  <category>[Nordic]</category>
+  <import>import nordic</import>
+  <make>nordic.nordic_rx($channel, $address_length, $crc_length, $data_rate)</make>
+  <param>
+    <name>RF Channel</name>
+    <key>channel</key>
+    <value>85</value>
+    <type>int</type>
+  </param>
+ <param>
+    <name>Address Length</name>
+    <key>address_length</key>
+    <value>5</value>
+    <type>int</type>
+  </param>
+  <param>
+    <name>CRC Length</name>
+    <key>crc_length</key>
+    <value>2</value>
+    <type>int</type>
+  </param>
+  <param>
+    <name>Data Rate</name>
+    <key>data_rate</key>
+    <value>2</value>
+    <type>int</type>
+  </param>
+  <sink>
+    <name>in</name>
+    <type>byte</type>
+  </sink>
+  <source>
+    <name>nordictap_out</name>
+    <type>message</type>
+  </source>
+</block>
