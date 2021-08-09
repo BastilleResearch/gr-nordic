@@ -24,6 +24,7 @@
 
 #include <gnuradio/io_signature.h>
 #include <gnuradio/fxpt.h>
+#include <stdio.h>
 #include "nordic_tx_impl.h"
 #include "nordictap.h"
 #include "enhanced_shockburst_packet.h"
@@ -49,7 +50,7 @@ namespace gr {
     {
       // Register nordictap input, which accepts packets to transmit
       message_port_register_in(pmt::intern("nordictap_in"));
-      set_msg_handler(pmt::intern("nordictap_in"), boost::bind(&nordic_tx_impl::nordictap_message_handler, this, _1));
+      set_msg_handler(pmt::intern("nordictap_in"), boost::bind(&nordic_tx_impl::nordictap_message_handler, this, boost::placeholders::_1));
     }
 
     /*
@@ -63,6 +64,7 @@ namespace gr {
     void nordic_tx_impl::nordictap_message_handler(pmt::pmt_t msg)
     {
       m_tx_queue.push(msg);
+      //printf("Got new message\n");
     }
 
     int
@@ -78,7 +80,7 @@ namespace gr {
         // Get the blob
         std::vector<uint8_t> vec = pmt::u8vector_elements(m_tx_queue.front());
         uint8_t * blob = vec.data();
-
+        
         // Read the channel index
         uint8_t channel = blob[0];
 
@@ -97,6 +99,7 @@ namespace gr {
         // Build the packet
         enhanced_shockburst_packet * packet =
           new enhanced_shockburst_packet(header.address_length,
+                                         header.big_packet,
                                          header.payload_length,
                                          header.sequence_number,
                                          header.no_ack,
@@ -107,14 +110,26 @@ namespace gr {
         // Remove the blob from the queue
         m_tx_queue.pop();
 
+        memset(output_items[channel], 0, packet->bytes_length()*2);
         // Write the output bytes
         uint8_t * out = (uint8_t *)output_items[channel];
+        
         for(int b = 0; b < packet->bytes_length(); b++)
+        //for(int b = 0; b < noutput_items; b++)
         {
           out[b] = packet->bytes()[b];
-          out[packet->bytes_length()*2+b] = packet->bytes()[b];
+          //printf(" ByteOut = %02X\n", out[b]);
+          //printf(" ByteIn = %02X\n", packet->bytes()[b]);
+          //out[packet->bytes_length()*2+b] = packet->bytes()[b];
+          //out[packet->bytes_length()*2+b] = 0x0;
+          //printf(" Bytes = %02X\n", out[packet->bytes_length()*2+b]);
+          //out[packet->bytes_length()*3+b] = packet->bytes()[b];
         }
-
+        /*for(int b = 0; b < 5; b++)
+        {
+         out[packet->bytes_length()*2+b] = 0x0;
+        }*/
+        //memcpy(output_items[0],out, packet->bytes_length()*2);
         // Write zeros to the other channels' buffers
         for(int c = 0; c < m_channel_count; c++)
         {
@@ -123,14 +138,34 @@ namespace gr {
             memset(output_items[c], 0, packet->bytes_length()*2);
           }
         }
-
+        //printf("Number of output items %d\n", noutput_items);
+        //printf("Channel = %d\n",blob[0]);
+        //printf("Packet length = %d\n",packet->bytes_length()*2);
+        //packet->print();
         // Cleanup
         delete[] address;
         delete[] payload;
-        delete packet;
+        //printf("Number of items written sob %ld\n", nitems_written(0));
+        add_item_tag(0, nitems_written(0),
+               pmt::string_to_symbol("tx_sob"),
+               pmt::PMT_T,
+               pmt::string_to_symbol(name()));
+        //printf("Number of items written eob %ld\n", nitems_written(0) + packet->bytes_length());
+        add_item_tag(0, nitems_written(0) + packet->bytes_length(),
+               pmt::string_to_symbol("tx_eob"),
+               pmt::PMT_T,
+               pmt::string_to_symbol(name()));
+        int packet_length = packet->bytes_length()*2;
+        //printf("Number of items written %ld\n", nitems_written(0));
+        add_item_tag(0, // Port number
+		nitems_written(0), // Offset
+		pmt::mp("packet_len"), // Key
+		pmt::from_uint64(packet_length) // Value
+		);
+        delete packet; //This is really stupid!
 
         // Return the number of bytes produced
-        return packet->bytes_length()*2;
+        return packet_length;
       }
       else
       {

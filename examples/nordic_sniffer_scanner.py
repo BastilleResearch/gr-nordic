@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 
 from gnuradio import gr, blocks, digital, filter
 from gnuradio.filter import firdes
 import _thread
-import osmosdr
+#import osmosdr
 import nordic
 import pmt
 import struct
 import time
+import iio
 
 
 class top_block(gr.top_block):
@@ -17,20 +20,21 @@ class top_block(gr.top_block):
 
         # SDR configuration
         self.freq = 2402e6
-        self.gain = 70
+        self.gain = 60
         self.symbol_rate = 2e6
         self.sample_rate = 4e6
 
         # SDR source (gr-osmosdr source)
-        self.osmosdr_source = osmosdr.source()
-        self.osmosdr_source.set_sample_rate(self.sample_rate)
-        self.osmosdr_source.set_center_freq(self.freq)
-        self.osmosdr_source.set_gain(self.gain)
-        self.osmosdr_source.set_antenna('TX/RX')
+        #self.osmosdr_source = osmosdr.source()
+        #self.osmosdr_source.set_sample_rate(self.sample_rate)
+        #self.osmosdr_source.set_center_freq(self.freq)
+        #self.osmosdr_source.set_gain(self.gain)
+        #self.osmosdr_source.set_antenna('TX/RX')
+        self.pluto_source = iio.pluto_source('', int(self.freq), int(self.sample_rate), int(2e6), 0x8000, True, True, True, "manual", 60.0, '', True)
 
         # Low pass filter
         self.lpf = filter.fir_filter_ccf(
-            1, firdes.low_pass_2(1, self.sample_rate, self.symbol_rate / 2, 50e3, 50))
+            1, firdes.low_pass_2(1, self.sample_rate, self.symbol_rate / 2, 100e3, 50))
 
         # GFSK demod, defaults to 2 samples per symbol
         self.gfsk_demod = digital.gfsk_demod()
@@ -39,7 +43,7 @@ class top_block(gr.top_block):
         self.nordic_rx = nordic.nordic_rx(3, 5, 2, 2)
 
         # Connect the blocks
-        self.connect((self.osmosdr_source, 0), (self.lpf, 0))
+        self.connect((self.pluto_source, 0), (self.lpf, 0))
         self.connect((self.lpf, 0), (self.gfsk_demod, 0))
         self.connect((self.gfsk_demod, 0), (self.nordic_rx, 0))
 
@@ -52,7 +56,9 @@ class top_block(gr.top_block):
     def set_channel(self, channel):
 
         new_channel = 2400e6 + channel * 1e6
-        self.osmosdr_source.set_center_freq(2400e6 + channel * 1e6)
+        self.pluto_source = iio.pluto_source('', int(2400e6 + channel * 1e6), int(self.sample_rate), int(2e6), 0x8000, True, True, True, "manual", 60.0, '', True)
+        #self.pluto_source.set_freq(2400e6 + channel * 1e6)
+        
         self.nordic_rx.set_channel(channel)
 
 
@@ -76,7 +82,7 @@ class microsoft_nordictap_handler(gr.sync_block):
         _thread.start_new_thread(self.tick, ())
 
         # Channels and channel groups
-        self.channels = list(range(2, 84))
+        self.channels = range(2, 102)
 
     # 10ms tick
     def tick(self):
@@ -120,11 +126,11 @@ class microsoft_nordictap_handler(gr.sync_block):
         self.last_rx = time.time()
 
         # Print the channel, sequence number, address and payload
-        print('CH=' + str(2400 + channel), end=' ')
-        print('SEQ=' + str(sequence_number), end=' ')
-        print('ADDR=' + ':'.join('%02X' % ord(b) for b in address), end=' ')
-        print('PLD=' + ':'.join('%02X' % ord(b) for b in payload), end=' ')
-        print('CRC=' + ':'.join('%02X' % ord(b) for b in crc))
+        print('CH=' + str(2400 + channel)),
+        print('SEQ=' + str(sequence_number)),
+        print('ADDR=' + ':'.join('%02X' % b for b in address)),
+        print('PLD=' + ':'.join('%02X' % b for b in payload)),
+        print('CRC=' + ':'.join('%02X' % b for b in crc))
 
 
 def main():

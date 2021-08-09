@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 from gnuradio import gr, blocks, digital, filter
 from gnuradio.filter import firdes
+import iio
 import _thread
 import nordic
 import pmt
@@ -9,11 +11,11 @@ import struct
 import time
 import numpy
 import array
-import osmosdr
+#import osmosdr
 import argparse
 from bitstring import BitArray
 from gnuradio import uhd
-from queue import Queue
+#from Queue import Queue
 
 
 class top_block(gr.top_block):
@@ -28,11 +30,12 @@ class top_block(gr.top_block):
         self.sample_rate = args.data_rate * args.samples_per_symbol
 
         # SDR source (gr-osmosdr source)_tx_queue.push(msg);
-        self.osmosdr_source = osmosdr.source()
-        self.osmosdr_source.set_sample_rate(self.sample_rate)
-        self.osmosdr_source.set_center_freq(self.freq)
-        self.osmosdr_source.set_gain(self.gain)
-        self.osmosdr_source.set_antenna('TX/RX')
+        #self.osmosdr_source = osmosdr.source()
+        #self.osmosdr_source.set_sample_rate(self.sample_rate)
+        #self.osmosdr_source.set_center_freq(self.freq)
+        #self.osmosdr_source.set_gain(self.gain)
+        #self.osmosdr_source.set_antenna('TX/RX')
+        self.pluto_source = iio.pluto_source('', int(self.freq), int(self.sample_rate), int(2e6), 0x8000, True, True, True, "manual", 60.0, '', True)
 
         # Receive chain
         dr = 0
@@ -45,8 +48,8 @@ class top_block(gr.top_block):
         self.gfsk_demod = digital.gfsk_demod(
             samples_per_symbol=args.samples_per_symbol)
         self.lpf = filter.fir_filter_ccf(
-            1, firdes.low_pass_2(1, self.sample_rate, self.symbol_rate / 2, 50e3, 50))
-        self.connect(self.osmosdr_source, self.lpf)
+            1, firdes.low_pass_2(1, self.sample_rate, self.symbol_rate / 2, 100e3, 50))
+        self.connect(self.pluto_source, self.lpf)
         self.connect(self.lpf, self.gfsk_demod)
         self.connect(self.gfsk_demod, self.rx)
 
@@ -56,7 +59,7 @@ class top_block(gr.top_block):
             self.rx, "nordictap_out", self.nordictap_printer, "nordictap_in")
 
 
-# Nordic Printer
+# Nordic Printeror
 class nordictap_printer(gr.sync_block):
 
     # Constructor
@@ -93,11 +96,11 @@ class nordictap_printer(gr.sync_block):
                    7 + address_length + payload_length + crc_length]
 
         # Print the channel, sequence number, address and payload
-        print('CH=' + str(2400 + channel), end=' ')
-        print('SEQ=' + str(sequence_number), end=' ')
-        print('ADDR=' + ':'.join('%02X' % ord(b) for b in address), end=' ')
-        print('PLD=' + ':'.join('%02X' % ord(b) for b in payload), end=' ')
-        print('CRC=' + ':'.join('%02X' % ord(b) for b in crc))
+        print('CH=' + str(2400 + channel)),
+        print('SEQ=' + str(sequence_number)),
+        print('ADDR=' + ':'.join('%02X' % b for b in address)),
+        print('PLD=' + ':'.join('%02X' % b for b in payload)),
+        print('CRC=' + ':'.join('%02X' % b for b in crc))
 
 
 def main():
@@ -106,7 +109,7 @@ def main():
     parser = argparse.ArgumentParser('Nordic Single-Channel Receiver Example',
                                      formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=50, width=120))
     parser.add_argument(
-        '-c', '--channel', type=int, help='RF channel (0-125)', default=4)
+        '-c', '--channel', type=int, help='RF channel (0-125)', default=120)
     parser.add_argument('-r', '--data_rate', type=float,
                         help='Data Rate (250e3, 1e6 or 2e6', default=2e6, choices=[250e3, 1e6, 2e6])
     parser.add_argument('-l', '--crc_length', type=int,

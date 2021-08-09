@@ -31,6 +31,9 @@ struct nordictap_header
   // CRC length, in bytes
   uint8_t crc_length;
 
+  // Big packet protocol
+  bool big_packet;
+
 } __attribute__((packed));
 
 #endif // NORDICTAP_H
