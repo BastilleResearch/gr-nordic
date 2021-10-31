@@ -1,20 +1,11 @@
-#!/usr/bin/env python2
+#!/usr/bin/python3
 
-from gnuradio import gr, blocks, digital, filter
+from gnuradio import gr, blocks, digital, filter, soapy
 from gnuradio.filter import firdes
-import thread
 import nordic
 import pmt
 import struct
-import time
-import numpy
-import array
-import osmosdr
 import argparse
-from bitstring import BitArray
-from gnuradio import uhd
-from Queue import Queue
-
 
 class top_block(gr.top_block):
 
@@ -27,13 +18,21 @@ class top_block(gr.top_block):
         self.symbol_rate = args.data_rate
         self.sample_rate = args.data_rate * args.samples_per_symbol
 
-        # SDR source (gr-osmosdr source)_tx_queue.push(msg);
-        self.osmosdr_source = osmosdr.source()
-        self.osmosdr_source.set_sample_rate(self.sample_rate)
-        self.osmosdr_source.set_center_freq(self.freq)
-        self.osmosdr_source.set_gain(self.gain)
-        self.osmosdr_source.set_antenna('TX/RX')
+        dev = 'driver=hackrf'
+        stream_args = ''
+        tune_args = ['']
+        settings = ['']
 
+        self.soapy_hackrf_source_0 = soapy.source(dev, "fc32", 1, '',
+                                  stream_args, tune_args, settings)
+
+        self.soapy_hackrf_source_0.set_sample_rate(0, self.sample_rate)
+        self.soapy_hackrf_source_0.set_bandwidth(0, 0)
+        self.soapy_hackrf_source_0.set_frequency(0, self.freq)
+        self.soapy_hackrf_source_0.set_gain(0, 'AMP', True)
+        self.soapy_hackrf_source_0.set_gain(0, 'LNA', min(max(32, 0.0), 40.0))
+        self.soapy_hackrf_source_0.set_gain(0, 'VGA', min(max(32, 0.0), 62.0))
+        
         # Receive chain
         dr = 0
         if args.data_rate == 1e6:
@@ -46,15 +45,14 @@ class top_block(gr.top_block):
             samples_per_symbol=args.samples_per_symbol)
         self.lpf = filter.fir_filter_ccf(
             1, firdes.low_pass_2(1, self.sample_rate, self.symbol_rate / 2, 50e3, 50))
-        self.connect(self.osmosdr_source, self.lpf)
-        self.connect(self.lpf, self.gfsk_demod)
-        self.connect(self.gfsk_demod, self.rx)
+        self.connect((self.soapy_hackrf_source_0, 0), (self.lpf, 0))
+        self.connect((self.lpf,0), (self.gfsk_demod,0))
+        self.connect((self.gfsk_demod,0), (self.rx,0))
 
         # Handle incoming packets
         self.nordictap_printer = nordictap_printer()
         self.msg_connect(
             self.rx, "nordictap_out", self.nordictap_printer, "nordictap_in")
-
 
 # Nordic Printer
 class nordictap_printer(gr.sync_block):
@@ -93,11 +91,7 @@ class nordictap_printer(gr.sync_block):
                    7 + address_length + payload_length + crc_length]
 
         # Print the channel, sequence number, address and payload
-        print 'CH=' + str(2400 + channel),
-        print 'SEQ=' + str(sequence_number),
-        print 'ADDR=' + ':'.join('%02X' % ord(b) for b in address),
-        print 'PLD=' + ':'.join('%02X' % ord(b) for b in payload),
-        print 'CRC=' + ':'.join('%02X' % ord(b) for b in crc)
+        print(f"""CH={2400 + channel} SEQ={sequence_number} ADDR={address.hex()} PLD={payload.hex()} CRC={crc.hex()}""")
 
 
 def main():
@@ -123,7 +117,7 @@ def main():
     tb = top_block(args)
     tb.start()
     try:
-        raw_input('Press Enter to quit: ')
+        input('Press Enter to quit: ')
     except EOFError:
         pass
     tb.stop()
