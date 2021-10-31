@@ -37,8 +37,8 @@ namespace gr {
                     uint8_t crc_length,
                     uint8_t data_rate)
     {
-      return gnuradio::get_initial_sptr
-        (new nordic_rx_impl(channel, address_length, crc_length, data_rate));
+      return gnuradio::make_block_sptr<nordic_rx_impl>
+        (channel, address_length, crc_length, data_rate);
     }
 
     /*
@@ -65,7 +65,6 @@ namespace gr {
      */
     nordic_rx_impl::~nordic_rx_impl()
     {
-
     }
 
     int
