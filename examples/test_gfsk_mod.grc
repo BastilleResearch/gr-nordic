@@ -330,7 +330,7 @@
     </param>
     <param>
       <key>wintype</key>
-      <value>firdes.WIN_BLACKMAN_hARRIS</value>
+      <value>window.WIN_BLACKMAN_hARRIS</value>
     </param>
   </block>
   <connection>
