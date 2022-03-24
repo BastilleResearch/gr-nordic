@@ -21,6 +21,7 @@ if __name__ == '__main__':
             print("Warning: failed to XInitThreads()")
 
 from PyQt5 import Qt
+from gnuradio.fft import window
 from gnuradio import qtgui
 from gnuradio.filter import firdes
 import sip
@@ -80,7 +81,7 @@ class tx_nrf_foo(gr.top_block, Qt.QWidget):
         self.samp_rate = samp_rate = 4e6
         self.payload = payload = "22.75"
         self.address = address = [0, 120, 2, 5, 8, 2, 0, 2, 231, 231, 231, 231, 231]
-        self.taps = taps = firdes.low_pass(1.0, samp_rate, (symbol_rate/2)*1.5,250e3, firdes.WIN_HAMMING, 6.76)
+        self.taps = taps = firdes.low_pass(1.0, samp_rate, (symbol_rate/2)*1.5,250e3, window.WIN_HAMMING, 6.76)
         self.pkt_vec = pkt_vec = address + [ ord(x) for x in payload ]
         self.freq = freq = 2520e6
 
@@ -176,14 +177,14 @@ class tx_nrf_foo(gr.top_block, Qt.QWidget):
 
     def set_symbol_rate(self, symbol_rate):
         self.symbol_rate = symbol_rate
-        self.set_taps(firdes.low_pass(1.0, self.samp_rate, (self.symbol_rate/2)*1.5, 250e3, firdes.WIN_HAMMING, 6.76))
+        self.set_taps(firdes.low_pass(1.0, self.samp_rate, (self.symbol_rate/2)*1.5, 250e3, window.WIN_HAMMING, 6.76))
 
     def get_samp_rate(self):
         return self.samp_rate
 
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
-        self.set_taps(firdes.low_pass(1.0, self.samp_rate, (self.symbol_rate/2)*1.5, 250e3, firdes.WIN_HAMMING, 6.76))
+        self.set_taps(firdes.low_pass(1.0, self.samp_rate, (self.symbol_rate/2)*1.5, 250e3, window.WIN_HAMMING, 6.76))
         self.iio_pluto_sink_0.set_params(int(self.freq), int(self.samp_rate), 2000000, 10.0, '', True)
         self.qtgui_time_sink_x_0.set_samp_rate(self.samp_rate)
 

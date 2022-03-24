@@ -23,6 +23,7 @@ options:
     sizing_mode: fixed
     thread_safe_setters: ''
     title: ''
+    window_size: (1000,1000)
   states:
     bus_sink: false
     bus_source: false
@@ -171,7 +172,7 @@ blocks:
     bus_structure: null
     coordinate: [128, 140.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_message_debug_0_0
   id: blocks_message_debug
   parameters:
@@ -206,7 +207,7 @@ blocks:
     bus_structure: null
     coordinate: [344, 172.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: digital_binary_slicer_fb_0
   id: digital_binary_slicer_fb
   parameters:
@@ -290,20 +291,24 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    auto_filter: 'True'
     bandwidth: '2000000'
     bbdc: 'True'
     buffer_size: '32768'
     comment: ''
     filter: ''
+    filter_source: '''Auto'''
+    fpass: '0'
     frequency: '2520000000'
+    fstop: '0'
     gain1: '''fast_attack'''
+    len_tag_key: packet_len
     manual_gain1: '64'
     maxoutbuf: '0'
     minoutbuf: '0'
     quadrature: 'True'
     rfdc: 'True'
     samplerate: int(samp_rate)
+    type: fc32
     uri: ''
   states:
     bus_sink: false
@@ -1095,7 +1100,7 @@ blocks:
     bus_structure: null
     coordinate: [19, 520]
     rotation: 0
-    state: disabled
+    state: enabled
 
 connections:
 - [analog_pwr_squelch_xx_1, '0', low_pass_filter_0, '0']
@@ -1120,3 +1125,4 @@ connections:
 
 metadata:
   file_format: 1
+  grc_version: v3.11.0.0git-55-g8526e6f8

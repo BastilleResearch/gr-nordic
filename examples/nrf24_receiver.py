@@ -6,9 +6,9 @@
 #
 # GNU Radio Python Flow Graph
 # Title: Nrf24 Receiver
-# GNU Radio version: v3.9.2.0-95-g02c0d949
+# GNU Radio version: v3.11.0.0git-71-g5664d8ae
 
-from distutils.version import StrictVersion
+from packaging.version import Version as StrictVersion
 
 if __name__ == '__main__':
     import ctypes
@@ -27,7 +27,6 @@ import sip
 from gnuradio import analog
 import math
 from gnuradio import blocks
-import pmt
 from gnuradio import digital
 from gnuradio import filter
 from gnuradio import gr
@@ -37,6 +36,8 @@ import signal
 from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
+from gnuradio import uhd
+import time
 import nordic
 
 
@@ -84,6 +85,21 @@ class nrf24_receiver(gr.top_block, Qt.QWidget):
         ##################################################
         # Blocks
         ##################################################
+        self.uhd_usrp_source_0 = uhd.usrp_source(
+            ",".join(("", "")),
+            uhd.stream_args(
+                cpu_format="fc32",
+                args='',
+                channels=list(range(0,1)),
+            ),
+        )
+        self.uhd_usrp_source_0.set_samp_rate(samp_rate)
+        self.uhd_usrp_source_0.set_time_unknown_pps(uhd.time_spec(0))
+
+        self.uhd_usrp_source_0.set_center_freq(2520000000, 0)
+        self.uhd_usrp_source_0.set_antenna('TX/RX', 0)
+        self.uhd_usrp_source_0.set_bandwidth(2e6, 0)
+        self.uhd_usrp_source_0.set_gain(85, 0)
         self.qtgui_time_sink_x_1 = qtgui.time_sink_c(
             1024, #size
             samp_rate, #samp_rate
@@ -133,7 +149,7 @@ class nrf24_receiver(gr.top_block, Qt.QWidget):
             self.qtgui_time_sink_x_1.set_line_marker(i, markers[i])
             self.qtgui_time_sink_x_1.set_line_alpha(i, alphas[i])
 
-        self._qtgui_time_sink_x_1_win = sip.wrapinstance(self.qtgui_time_sink_x_1.pyqwidget(), Qt.QWidget)
+        self._qtgui_time_sink_x_1_win = sip.wrapinstance(self.qtgui_time_sink_x_1.qwidget(), Qt.QWidget)
         self.top_layout.addWidget(self._qtgui_time_sink_x_1_win)
         self.qtgui_time_sink_x_0_2 = qtgui.time_sink_f(
             int(1024/4), #size
@@ -181,7 +197,7 @@ class nrf24_receiver(gr.top_block, Qt.QWidget):
             self.qtgui_time_sink_x_0_2.set_line_marker(i, markers[i])
             self.qtgui_time_sink_x_0_2.set_line_alpha(i, alphas[i])
 
-        self._qtgui_time_sink_x_0_2_win = sip.wrapinstance(self.qtgui_time_sink_x_0_2.pyqwidget(), Qt.QWidget)
+        self._qtgui_time_sink_x_0_2_win = sip.wrapinstance(self.qtgui_time_sink_x_0_2.qwidget(), Qt.QWidget)
         self.top_layout.addWidget(self._qtgui_time_sink_x_0_2_win)
         self.nordic_nordictap_printer_0 = nordic.nordictap_printer()
         self.nordic_nordic_rx_0 = nordic.nordic_rx(120, 5, 2, 2, '')
@@ -198,13 +214,9 @@ class nrf24_receiver(gr.top_block, Qt.QWidget):
           0, 'burst')
         self.digital_clock_recovery_mm_xx_0 = digital.clock_recovery_mm_ff(2*(1+0.0), 0.25*0.175*0.175, 0.5, 0.175, 0.005)
         self.digital_binary_slicer_fb_0 = digital.binary_slicer_fb()
-        self.blocks_throttle_0 = blocks.throttle(gr.sizeof_gr_complex*1, samp_rate,True)
-        self.blocks_file_source_0 = blocks.file_source(gr.sizeof_gr_complex*1, '/home/bjk/gnuradio/src/to_repair/gr-nordic/examples/nrf_data.bin', True, 0, 0)
-        self.blocks_file_source_0.set_begin_tag(pmt.PMT_NIL)
         self.blocks_char_to_float_0_2 = blocks.char_to_float(1, 1)
         self.analog_quadrature_demod_cf_0 = analog.quadrature_demod_cf(1/((3.1415/2)/2))
         self.analog_pwr_squelch_xx_1 = analog.pwr_squelch_cc(-35, 5e-4, 0, False)
-
 
 
         ##################################################
@@ -215,13 +227,12 @@ class nrf24_receiver(gr.top_block, Qt.QWidget):
         self.connect((self.analog_pwr_squelch_xx_1, 0), (self.qtgui_time_sink_x_1, 0))
         self.connect((self.analog_quadrature_demod_cf_0, 0), (self.digital_clock_recovery_mm_xx_0, 0))
         self.connect((self.blocks_char_to_float_0_2, 0), (self.qtgui_time_sink_x_0_2, 0))
-        self.connect((self.blocks_file_source_0, 0), (self.blocks_throttle_0, 0))
-        self.connect((self.blocks_throttle_0, 0), (self.analog_pwr_squelch_xx_1, 0))
         self.connect((self.digital_binary_slicer_fb_0, 0), (self.digital_correlate_access_code_xx_ts_0, 0))
         self.connect((self.digital_binary_slicer_fb_0, 0), (self.nordic_nordic_rx_0, 0))
         self.connect((self.digital_clock_recovery_mm_xx_0, 0), (self.digital_binary_slicer_fb_0, 0))
         self.connect((self.digital_correlate_access_code_xx_ts_0, 0), (self.blocks_char_to_float_0_2, 0))
         self.connect((self.low_pass_filter_0, 0), (self.analog_quadrature_demod_cf_0, 0))
+        self.connect((self.uhd_usrp_source_0, 0), (self.analog_pwr_squelch_xx_1, 0))
 
 
     def closeEvent(self, event):
@@ -237,10 +248,10 @@ class nrf24_receiver(gr.top_block, Qt.QWidget):
 
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
-        self.blocks_throttle_0.set_sample_rate(self.samp_rate)
         self.low_pass_filter_0.set_taps(firdes.low_pass(1, self.samp_rate, 1e6, 250e3, window.WIN_HAMMING, 6.76))
         self.qtgui_time_sink_x_0_2.set_samp_rate(self.samp_rate/2)
         self.qtgui_time_sink_x_1.set_samp_rate(self.samp_rate)
+        self.uhd_usrp_source_0.set_samp_rate(self.samp_rate)
 
 
 

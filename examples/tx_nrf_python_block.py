@@ -29,6 +29,7 @@ import pmt
 from gnuradio import digital
 from gnuradio import filter
 from gnuradio import gr
+from gnuradio.fft import window
 import sys
 import signal
 from argparse import ArgumentParser
@@ -78,7 +79,7 @@ class tx_nrf_python_block(gr.top_block, Qt.QWidget):
         ##################################################
         self.symbol_rate = symbol_rate = 2e6
         self.samp_rate = samp_rate = 4e6
-        self.taps = taps = firdes.low_pass(1.0, samp_rate, (symbol_rate/2),250e3, firdes.WIN_HAMMING, 6.76)
+        self.taps = taps = firdes.low_pass(1.0, samp_rate, (symbol_rate/2),250e3, window.WIN_HAMMING, 6.76)
         self.payload = payload = "24.25"
         self.freq = freq = 2520e6
 
@@ -228,14 +229,14 @@ class tx_nrf_python_block(gr.top_block, Qt.QWidget):
 
     def set_symbol_rate(self, symbol_rate):
         self.symbol_rate = symbol_rate
-        self.set_taps(firdes.low_pass(1.0, self.samp_rate, (self.symbol_rate/2), 250e3, firdes.WIN_HAMMING, 6.76))
+        self.set_taps(firdes.low_pass(1.0, self.samp_rate, (self.symbol_rate/2), 250e3, window.WIN_HAMMING, 6.76))
 
     def get_samp_rate(self):
         return self.samp_rate
 
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
-        self.set_taps(firdes.low_pass(1.0, self.samp_rate, (self.symbol_rate/2), 250e3, firdes.WIN_HAMMING, 6.76))
+        self.set_taps(firdes.low_pass(1.0, self.samp_rate, (self.symbol_rate/2), 250e3, window.WIN_HAMMING, 6.76))
         self.iio_pluto_sink_0.set_params(int(self.freq), int(self.samp_rate), 2000000, 10.0, '', True)
         self.qtgui_time_sink_x_0.set_samp_rate(self.samp_rate)
         self.qtgui_time_sink_x_0_0.set_samp_rate(self.samp_rate)
