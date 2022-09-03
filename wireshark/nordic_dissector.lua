@@ -32,16 +32,19 @@ function nordic_proto.dissector(buffer,pinfo,tree)
     -- crc length
     local crc_length = buffer(6,1):uint()
 
+    -- dynamic payloads bit
+    local dynamic_payload = buffer(7,1):uint()
+
     -- address
-    local address = buffer(7,address_length)
+    local address = buffer(8,address_length)
     local address_bytes = address:bytes()
 
     -- payload
-    local payload = buffer(7+address_length,payload_length)
+    local payload = buffer(8+address_length,payload_length)
     local payload_bytes = payload:bytes()
 
     -- crc
-    local crc = buffer(7+address_length+payload_length, crc_length)
+    local crc = buffer(8+address_length+payload_length, crc_length)
 
     subtree:add(buffer(0,1), "Channel:         " .. (2400+channel) .. "MHz")
     subtree:add(buffer(1,1), "Data Rate:       " .. data_rate_string)
@@ -49,10 +52,11 @@ function nordic_proto.dissector(buffer,pinfo,tree)
     subtree:add(buffer(3,1), "Payload Length:  " .. payload_length)
     subtree:add(buffer(4,1), "Sequence Number: " .. sequence_number)
     subtree:add(buffer(5,1), "No ACK:          " .. no_ack)
-    subtree:add(buffer(6,1), "CRC Length:      " .. crc_length)
-    subtree:add(buffer(7,address_length), "Address:         " .. address)
-    subtree:add(buffer(7+address_length,payload_length), "Payload:         " .. payload)
-    subtree:add(buffer(7+address_length+payload_length, crc_length), "CRC:             " .. crc)
+    subtree:add(buffer(6,1), "Dynamic Payload: " .. dynamic_payload)
+    subtree:add(buffer(7,1), "CRC Length:      " .. crc_length)
+    subtree:add(buffer(8,address_length), "Address:         " .. address)
+    subtree:add(buffer(8+address_length,payload_length), "Payload:         " .. payload)
+    subtree:add(buffer(8+address_length+payload_length, crc_length), "CRC:             " .. crc)
 
     -- Keepalive (vendor agnostic)
     if payload_bytes:len() == 0 then

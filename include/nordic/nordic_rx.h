@@ -36,7 +36,7 @@ namespace gr {
     class NORDIC_API nordic_rx : virtual public gr::sync_block
     {
      public:
-      typedef boost::shared_ptr<nordic_rx> sptr;
+      typedef std::shared_ptr<nordic_rx> sptr;
 
       /*!
        * \brief Return a shared_ptr to a new instance of nordic::nordic_rx.
@@ -46,10 +46,11 @@ namespace gr {
        * class. nordic::nordic_rx::make is the public interface for
        * creating new instances.
        */
-      static sptr make(uint8_t channel=0,
-                       uint8_t address_length=5,
-                       uint8_t crc_length=2,
-                       uint8_t data_rate=0);
+      static sptr make(const uint8_t channel=0,
+                       const uint8_t address_length=5,
+                       const uint8_t crc_length=2,
+                       const uint8_t data_rate=0,
+		       const std::string &address_match="");
 
       // Channel getter/setter
       virtual uint8_t get_channel()=0;

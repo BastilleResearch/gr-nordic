@@ -1,0 +1,228 @@
+options:
+  parameters:
+    author: ''
+    catch_exceptions: 'True'
+    category: '[GRC Hier Blocks]'
+    cmake_opt: ''
+    comment: ''
+    copyright: ''
+    description: ''
+    gen_cmake: 'On'
+    gen_linking: dynamic
+    generate_options: qt_gui
+    hier_block_src_path: '.:'
+    id: top_block
+    max_nouts: '0'
+    output_language: python
+    placement: (0,0)
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    run_options: prompt
+    sizing_mode: fixed
+    thread_safe_setters: ''
+    title: ''
+    window_size: ''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 8]
+    rotation: 0
+    state: enabled
+
+blocks:
+- name: address
+  id: variable
+  parameters:
+    comment: ''
+    value: '[0, 85, 2, 5, 8, 0, 0, 2, 85, 85, 85, 85, 85]'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [16, 332]
+    rotation: 0
+    state: enabled
+- name: payload
+  id: variable
+  parameters:
+    comment: ''
+    value: '"    20.0"'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [16, 252]
+    rotation: 0
+    state: enabled
+- name: pkt_vec
+  id: variable
+  parameters:
+    comment: ''
+    value: address + [ ord(x) for x in payload ]
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [16, 412]
+    rotation: 0
+    state: enabled
+- name: probe_var
+  id: variable_function_probe
+  parameters:
+    block_id: probe_signal
+    comment: ''
+    function_args: ''
+    function_name: level
+    poll_rate: '10'
+    value: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [17, 486]
+    rotation: 0
+    state: enabled
+- name: samp_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: '32000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 160]
+    rotation: 0
+    state: enabled
+- name: variable_qtgui_entry_0
+  id: variable_qtgui_entry
+  parameters:
+    comment: ''
+    gui_hint: ''
+    label: ''
+    type: int
+    value: probe_var
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [18, 81]
+    rotation: 0
+    state: enabled
+- name: blocks_message_strobe_0
+  id: blocks_message_strobe
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    msg: pmt.init_u8vector( len(pkt_vec),  pkt_vec)
+    period: '500'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [294, 199]
+    rotation: 0
+    state: disabled
+- name: blocks_message_strobe_1
+  id: blocks_message_strobe
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    msg: pmt.intern("trig")
+    period: '2000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [161, 599]
+    rotation: 0
+    state: true
+- name: blocks_throttle_0
+  id: blocks_throttle
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    ignoretag: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samples_per_second: samp_rate
+    type: byte
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [794, 207]
+    rotation: 0
+    state: true
+- name: nordic_nordic_tx_0
+  id: nordic_nordic_tx
+  parameters:
+    affinity: ''
+    alias: ''
+    channel_count: '1'
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [618, 207]
+    rotation: 0
+    state: enabled
+- name: nordic_nordictap_transmitter_0
+  id: nordic_nordictap_transmitter
+  parameters:
+    address: '''\x55\x55\x55\x55\x55'''
+    affinity: ''
+    alias: ''
+    big_packet: '0'
+    channel_count: '1'
+    channel_index: '0'
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    payload: '''\x20\x20\x20\x20\x32\x30\x2E\x30'''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [348, 398]
+    rotation: 0
+    state: true
+- name: probe_signal
+  id: blocks_probe_signal_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    type: byte
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [981, 207]
+    rotation: 0
+    state: enabled
+
+connections:
+- [blocks_message_strobe_0, strobe, nordic_nordic_tx_0, nordictap_in]
+- [blocks_message_strobe_1, strobe, nordic_nordictap_transmitter_0, trig]
+- [blocks_throttle_0, '0', probe_signal, '0']
+- [nordic_nordic_tx_0, '0', blocks_throttle_0, '0']
+- [nordic_nordictap_transmitter_0, nordictap_out, nordic_nordic_tx_0, nordictap_in]
+
+metadata:
+  file_format: 1
+  grc_version: v3.11.0.0git-215-g9a698313

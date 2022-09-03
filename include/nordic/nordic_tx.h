@@ -36,7 +36,7 @@ namespace gr {
     class NORDIC_API nordic_tx : virtual public gr::sync_block
     {
      public:
-      typedef boost::shared_ptr<nordic_tx> sptr;
+      typedef std::shared_ptr<nordic_tx> sptr;
 
       /*!
        * \brief Return a shared_ptr to a new instance of nordic::nordic_tx.

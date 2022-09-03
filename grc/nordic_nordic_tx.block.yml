@@ -1,0 +1,20 @@
+id: nordic_nordic_tx
+label: nordic tx
+category: '[Nordic]'
+templates:
+  imports: import nordic
+  make: nordic.nordic_tx(${channel_count})
+parameters:
+- id: channel_count
+  label: Channel_count
+  default: '1'
+  dtype: int
+inputs:
+- label: nordictap_in
+  domain: message
+outputs:
+- label: out
+  domain: stream
+  dtype: byte
+  multiplicity: ${channel_count}
+file_format: 1
